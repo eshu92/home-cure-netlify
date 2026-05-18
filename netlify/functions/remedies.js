@@ -29,7 +29,7 @@ exports.handler = async (event) => {
       : event.body;
 
     const parsed = JSON.parse(rawBody);
-    parsed.model = "claude-3-haiku-20240307";
+    parsed.model = "claude-haiku-4-5-20251001";
     parsed.max_tokens = parsed.max_tokens || 1000;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
