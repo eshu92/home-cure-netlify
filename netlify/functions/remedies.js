@@ -1,5 +1,4 @@
 exports.handler = async (event) => {
-  // Handle CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
