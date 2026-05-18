@@ -427,26 +427,27 @@ export default function HomeCureApp() {
               </div>
             )}
 
-            {/* Category teaser when no search */}
+            {/* Landing feature cards */}
             {!loading && !remedies && !srchError && (
-              <div style={{ maxWidth:860, margin:"0 auto", padding:"4px 20px 50px" }}>
-                <p style={{ color:"rgba(255,240,200,0.4)", fontSize:13, fontWeight:600, textAlign:"center", marginBottom:18 }}>
-                  Or browse by health category
+              <div style={{ textAlign:"center", padding:"10px 20px 50px" }}>
+                <p style={{ color:"rgba(255,240,200,0.45)", fontSize:14, fontWeight:600, marginBottom:28 }}>
+                  Type your ailment or pick one above to get started
                 </p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:10 }}>
-                  {CATEGORIES.map(cat => (
-                    <div key={cat.id} className="hc-cat-card"
-                      style={{ background:`linear-gradient(140deg,${cat.grad[0]},${cat.grad[1]})`, borderColor:`${cat.accent}22` }}
-                      onClick={() => fetchCategoryRemedies(cat)}>
-                      <div style={{ fontSize:28, marginBottom:6 }}>{cat.emoji}</div>
-                      <div style={{ fontFamily:"'Playfair Display',serif", color:cat.text, fontSize:13, fontWeight:700, marginBottom:2 }}>{cat.label}</div>
-                      <div style={{ color:cat.accent, fontSize:10, fontWeight:600 }}>{cat.desc}</div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:16, justifyContent:"center" }}>
+                  {[
+                    { icon:"🌿", text:"Natural kitchen ingredients" },
+                    { icon:"⚡", text:"Fast AI-powered lookup" },
+                    { icon:"📖", text:"Step-by-step instructions" },
+                    { icon:"❤️", text:"Time-tested wisdom" },
+                  ].map((f, i) => (
+                    <div key={i} style={{ background:"rgba(255,245,210,0.09)", border:"1px solid rgba(255,235,170,0.15)", borderRadius:18, padding:"22px 18px", width:155, textAlign:"center" }}>
+                      <div style={{ fontSize:34, marginBottom:10 }}>{f.icon}</div>
+                      <div style={{ color:"rgba(255,240,200,0.7)", fontSize:12, fontWeight:600, lineHeight:1.4 }}>{f.text}</div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
             <p style={{ textAlign:"center", color:"rgba(255,240,200,0.28)", fontSize:12, paddingBottom:30 }}>
               🌿 Always consult a healthcare professional for serious conditions
             </p>
