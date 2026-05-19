@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 
-// ── Constants ──────────────────────────────────────────────────────────────
-
 const CARD_THEMES = [
   { gradFrom:"#fff8e1", gradTo:"#ffe0b2", border:"#e65100", text:"#4a1c00", tag:"#bf360c" },
   { gradFrom:"#e8f5e9", gradTo:"#c8e6c9", border:"#2e7d32", text:"#1b4a1e", tag:"#1b5e20" },
@@ -52,11 +50,20 @@ const BG_VEGGIES = [
   { emoji:"🌿",  size:42, x:2,  y:88, speed:0.021, dur:5.6, delay:1.8 },
 ];
 
-// ── Shared RemedyCard (top-level, stable reference) ────────────────────────
+// ── RemedyCard (top-level stable component) ────────────────────────────────
 
 function RemedyCard({ remedy, themeIdx, isFav, onToggleFav }) {
   const t     = CARD_THEMES[themeIdx % CARD_THEMES.length];
   const faved = isFav(remedy.id);
+
+  const condition = remedy.condition || remedy.name;
+  const shareText = encodeURIComponent(
+    `🌿 Natural remedy for ${condition}: "${remedy.name}"\n${remedy.tagline}\n\nFind more natural remedies at homecureai.com #NaturalRemedies #HomeCureAI`
+  );
+  const whatsappText = encodeURIComponent(
+    `🌿 Natural remedy for *${condition}*:\n*${remedy.name}* – ${remedy.tagline}\n\nFind more at homecureai.com`
+  );
+
   return (
     <div className="hc-card" style={{ animationDelay:`${themeIdx * 0.1}s` }}>
       <div className="hc-card-inner"
@@ -68,32 +75,56 @@ function RemedyCard({ remedy, themeIdx, isFav, onToggleFav }) {
           {faved ? "❤️" : "🤍"}
         </button>
 
-        <div style={{ display:"flex", gap:14, alignItems:"flex-start", marginBottom:18 }}>
-          <div className="hc-emoji-box" style={{ width:68, height:68, fontSize:38 }}>{remedy.emoji}</div>
+        {/* Header */}
+        <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:16 }}>
+          <div className="hc-emoji-box" style={{ width:62, height:62, fontSize:34 }}>{remedy.emoji}</div>
           <div style={{ flex:1, paddingRight:32 }}>
-            <div style={{ fontFamily:"'Playfair Display',serif", color:t.text, fontSize:19, fontWeight:700, lineHeight:1.2, marginBottom:2 }}>{remedy.name}</div>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontStyle:"italic", color:t.tag, fontSize:13, marginBottom:8, opacity:0.85 }}>{remedy.tagline}</div>
-            <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
-              <span style={{ background:`${t.border}18`, color:t.text, fontSize:11, padding:"3px 10px", borderRadius:20, fontWeight:800 }}>⏱ {remedy.time}</span>
-              <span style={{ background:`${t.border}18`, color:t.text, fontSize:11, padding:"3px 10px", borderRadius:20, fontWeight:800 }}>💪 {remedy.difficulty}</span>
-              {remedy.condition && <span style={{ background:`${t.border}18`, color:t.text, fontSize:11, padding:"3px 10px", borderRadius:20, fontWeight:800 }}>🎯 {remedy.condition}</span>}
+            <div style={{ fontFamily:"'Playfair Display',serif", color:t.text, fontSize:18, fontWeight:700, lineHeight:1.2, marginBottom:2 }}>{remedy.name}</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontStyle:"italic", color:t.tag, fontSize:12, marginBottom:7, opacity:0.85 }}>{remedy.tagline}</div>
+            <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+              <span style={{ background:`${t.border}18`, color:t.text, fontSize:10, padding:"2px 9px", borderRadius:20, fontWeight:800 }}>⏱ {remedy.time}</span>
+              <span style={{ background:`${t.border}18`, color:t.text, fontSize:10, padding:"2px 9px", borderRadius:20, fontWeight:800 }}>💪 {remedy.difficulty}</span>
+              {remedy.condition && <span style={{ background:`${t.border}18`, color:t.text, fontSize:10, padding:"2px 9px", borderRadius:20, fontWeight:800 }}>🎯 {remedy.condition}</span>}
             </div>
           </div>
         </div>
 
-        <p style={{ color:t.tag, fontSize:10, fontWeight:900, textTransform:"uppercase", letterSpacing:2, margin:"0 0 8px" }}>🧴 Ingredients</p>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:16 }}>
+        {/* Ingredients */}
+        <p style={{ color:t.tag, fontSize:10, fontWeight:900, textTransform:"uppercase", letterSpacing:2, margin:"0 0 7px" }}>🧴 Ingredients</p>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:14 }}>
           {(remedy.ingredients || []).map((ing, j) => (
             <span key={j} className="hc-ing" style={{ background:`${t.border}12`, borderColor:`${t.border}32`, color:t.text }}>{ing}</span>
           ))}
         </div>
 
-        <p style={{ color:t.tag, fontSize:10, fontWeight:900, textTransform:"uppercase", letterSpacing:2, margin:"0 0 7px" }}>📋 Instructions</p>
-        <p style={{ color:t.text, fontSize:13, lineHeight:1.75, marginBottom:14, opacity:0.88 }}>{remedy.instructions}</p>
+        {/* Instructions */}
+        <p style={{ color:t.tag, fontSize:10, fontWeight:900, textTransform:"uppercase", letterSpacing:2, margin:"0 0 6px" }}>📋 Instructions</p>
+        <p style={{ color:t.text, fontSize:13, lineHeight:1.7, marginBottom:13, opacity:0.88 }}>{remedy.instructions}</p>
 
-        <div style={{ background:`${t.border}10`, border:`1px solid ${t.border}22`, borderRadius:12, padding:"10px 14px", display:"flex", gap:8, alignItems:"flex-start" }}>
-          <span style={{ fontSize:16, flexShrink:0 }}>✨</span>
+        {/* Benefit */}
+        <div style={{ background:`${t.border}10`, border:`1px solid ${t.border}22`, borderRadius:12, padding:"9px 13px", display:"flex", gap:8, alignItems:"flex-start", marginBottom:14 }}>
+          <span style={{ fontSize:15, flexShrink:0 }}>✨</span>
           <span style={{ color:t.text, fontSize:12, fontWeight:700, lineHeight:1.5 }}>{remedy.benefit}</span>
+        </div>
+
+        {/* Share buttons */}
+        <div style={{ display:"flex", alignItems:"center", gap:7, paddingTop:12, borderTop:`1px solid ${t.border}18` }}>
+          <span style={{ color:t.tag, fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:1, marginRight:2 }}>Share:</span>
+          <a href={`https://twitter.com/intent/tweet?text=${shareText}`}
+            target="_blank" rel="noopener noreferrer"
+            style={{ background:`${t.border}14`, border:`1px solid ${t.border}28`, borderRadius:20, padding:"4px 11px", color:t.text, fontSize:11, fontWeight:800, textDecoration:"none", display:"flex", alignItems:"center", gap:4, transition:"all 0.2s" }}>
+            𝕏 Tweet
+          </a>
+          <a href={`https://wa.me/?text=${whatsappText}`}
+            target="_blank" rel="noopener noreferrer"
+            style={{ background:`${t.border}14`, border:`1px solid ${t.border}28`, borderRadius:20, padding:"4px 11px", color:t.text, fontSize:11, fontWeight:800, textDecoration:"none", display:"flex", alignItems:"center", gap:4, transition:"all 0.2s" }}>
+            💬 WhatsApp
+          </a>
+          <button
+            onClick={() => { navigator.clipboard?.writeText(`🌿 ${remedy.name} – ${remedy.tagline}\n\nFind more at homecureai.com`); }}
+            style={{ background:`${t.border}14`, border:`1px solid ${t.border}28`, borderRadius:20, padding:"4px 11px", color:t.text, fontSize:11, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", gap:4, transition:"all 0.2s" }}>
+            🔗 Copy
+          </button>
         </div>
       </div>
     </div>
@@ -103,7 +134,6 @@ function RemedyCard({ remedy, themeIdx, isFav, onToggleFav }) {
 // ── Main App ───────────────────────────────────────────────────────────────
 
 export default function HomeCureApp() {
-
   const [view,        setView]        = useState("home");
   const [query,       setQuery]       = useState("");
   const [loading,     setLoading]     = useState(false);
@@ -118,18 +148,13 @@ export default function HomeCureApp() {
     catch { return []; }
   });
   const [mouse,   setMouse]   = useState({ x:0.5, y:0.5 });
-  const [hovered, setHovered] = useState(null);
 
   const rafRef       = useRef(null);
   const targetMouse  = useRef({ x:0.5, y:0.5 });
   const currentMouse = useRef({ x:0.5, y:0.5 });
 
-  // Persist favorites
-  useEffect(() => {
-    localStorage.setItem("hc_favs", JSON.stringify(favorites));
-  }, [favorites]);
+  useEffect(() => { localStorage.setItem("hc_favs", JSON.stringify(favorites)); }, [favorites]);
 
-  // Mouse parallax (only updates veggie layer, doesn't affect main content)
   useEffect(() => {
     const onMove = (e) => {
       targetMouse.current = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight };
@@ -137,7 +162,7 @@ export default function HomeCureApp() {
     window.addEventListener("mousemove", onMove);
     const tick = () => {
       const t = targetMouse.current, c = currentMouse.current;
-      currentMouse.current = { x: c.x + (t.x - c.x) * 0.06, y: c.y + (t.y - c.y) * 0.06 };
+      currentMouse.current = { x: c.x+(t.x-c.x)*0.06, y: c.y+(t.y-c.y)*0.06 };
       setMouse({ ...currentMouse.current });
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -145,13 +170,11 @@ export default function HomeCureApp() {
     return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  // Helpers
-  const isFav      = (id) => favorites.some(f => f.id === id);
-  const toggleFav  = (remedy) => setFavorites(prev =>
+  const isFav     = (id) => favorites.some(f => f.id === id);
+  const toggleFav = (remedy) => setFavorites(prev =>
     isFav(remedy.id) ? prev.filter(f => f.id !== remedy.id) : [...prev, remedy]
   );
 
-  // API call
   const callAPI = async (messages) => {
     const res = await fetch("/.netlify/functions/remedies", {
       method:"POST",
@@ -163,40 +186,26 @@ export default function HomeCureApp() {
     return JSON.parse(raw.replace(/```json|```/g, "").trim());
   };
 
-  // Search
   const fetchRemedies = async (overrideQuery) => {
     const q = (overrideQuery || query).trim();
     if (!q) return;
     setLoading(true); setSrchError(""); setRemedies(null);
     try {
-      const parsed = await callAPI([{
-        role:"user",
-        content:`You are a warm home remedies herbalist. For the condition: "${q}", provide 4 effective natural home remedies. Return ONLY a valid JSON object, NO markdown. Structure: {"condition":"name","disclaimer":"brief one-sentence disclaimer","remedies":[{"name":"remedy name","emoji":"single emoji","tagline":"5-7 word poetic tagline","ingredients":["ingredient 1","ingredient 2","ingredient 3"],"instructions":"clear 2-3 sentence how-to","benefit":"key healing benefit","difficulty":"Easy","time":"e.g. 5 mins"}]}`
-      }]);
+      const parsed = await callAPI([{ role:"user", content:`You are a warm home remedies herbalist. For the condition: "${q}", provide 4 effective natural home remedies. Return ONLY a valid JSON object, NO markdown. Structure: {"condition":"name","disclaimer":"brief one-sentence disclaimer","remedies":[{"name":"remedy name","emoji":"single emoji","tagline":"5-7 word poetic tagline","ingredients":["ingredient 1","ingredient 2","ingredient 3"],"instructions":"clear 2-3 sentence how-to","benefit":"key healing benefit","difficulty":"Easy","time":"e.g. 5 mins"}]}` }]);
       parsed.remedies = parsed.remedies.map((r, i) => ({ ...r, id:`s_${Date.now()}_${i}` }));
       setRemedies(parsed);
-    } catch {
-      setSrchError("Couldn't reach nature's pantry. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setSrchError("Couldn't reach nature's pantry. Please try again."); }
+    finally   { setLoading(false); }
   };
 
-  // Category fetch
   const fetchCategoryRemedies = async (cat) => {
     setSelectedCat(cat); setView("cat-detail");
     setCatLoading(true); setCatRemedies(null); setCatError(false);
     try {
-      const parsed = await callAPI([{
-        role:"user",
-        content:`You are a home remedies herbalist. Provide 6 natural home remedies for the health category "${cat.label}". Return ONLY a valid JSON object, NO markdown. Structure: {"remedies":[{"name":"name","emoji":"emoji","tagline":"5-7 word tagline","condition":"specific condition","ingredients":["item 1","item 2","item 3"],"instructions":"clear 2-3 sentence how-to","benefit":"key healing benefit","difficulty":"Easy or Medium","time":"prep time"}]}`
-      }]);
+      const parsed = await callAPI([{ role:"user", content:`You are a home remedies herbalist. Provide 6 natural home remedies for the health category "${cat.label}". Return ONLY a valid JSON object, NO markdown. Structure: {"remedies":[{"name":"name","emoji":"emoji","tagline":"5-7 word tagline","condition":"specific condition","ingredients":["item 1","item 2","item 3"],"instructions":"clear 2-3 sentence how-to","benefit":"key healing benefit","difficulty":"Easy or Medium","time":"prep time"}]}` }]);
       setCatRemedies(parsed.remedies.map((r, i) => ({ ...r, id:`c_${cat.id}_${Date.now()}_${i}` })));
-    } catch {
-      setCatError(true);
-    } finally {
-      setCatLoading(false);
-    }
+    } catch { setCatError(true); }
+    finally   { setCatLoading(false); }
   };
 
   const favCount = favorites.length;
@@ -207,6 +216,7 @@ export default function HomeCureApp() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Nunito:wght@400;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
         body{overflow-x:hidden}
+
         .hc-root{
           min-height:100vh;font-family:'Nunito',sans-serif;
           background-color:#7a4f2d;
@@ -220,16 +230,16 @@ export default function HomeCureApp() {
                      radial-gradient(ellipse at 20% 100%,rgba(80,30,10,0.35) 0%,transparent 50%),
                      radial-gradient(ellipse at 80% 100%,rgba(60,20,5,0.3) 0%,transparent 50%);}
 
-        /* Veggie layer — BEHIND everything */
         .hc-veggie{position:fixed;pointer-events:none;z-index:0;transform-origin:center;
           filter:drop-shadow(2px 4px 6px rgba(50,20,5,0.25));will-change:transform;}
 
-        @keyframes vfloat0{0%,100%{transform:translateY(0px) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
-        @keyframes vfloat1{0%,100%{transform:translateY(0px) rotate(6deg)}50%{transform:translateY(-10px) rotate(-5deg)}}
-        @keyframes vfloat2{0%,100%{transform:translateY(0px) rotate(-2deg)}50%{transform:translateY(-18px) rotate(6deg)}}
-        @keyframes vfloat3{0%,100%{transform:translateY(0px) rotate(8deg)}50%{transform:translateY(-8px) rotate(-8deg)}}
+        /* ── Animations ── */
+        @keyframes vfloat0{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+        @keyframes vfloat1{0%,100%{transform:translateY(0) rotate(6deg)}50%{transform:translateY(-10px) rotate(-5deg)}}
+        @keyframes vfloat2{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-18px) rotate(6deg)}}
+        @keyframes vfloat3{0%,100%{transform:translateY(0) rotate(8deg)}50%{transform:translateY(-8px) rotate(-8deg)}}
         @keyframes leafSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes cardIn{from{opacity:0;transform:translateY(34px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
         @keyframes heroIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
         @keyframes btnPulse{0%,100%{box-shadow:0 6px 24px rgba(214,141,52,0.4)}50%{box-shadow:0 6px 36px rgba(214,141,52,0.7)}}
@@ -237,130 +247,170 @@ export default function HomeCureApp() {
         .hc-hero{animation:heroIn 0.9s ease both}
         .hc-card{animation:cardIn 0.52s ease both}
 
-        .hc-card-inner{
-          border-radius:24px;padding:26px;border:1.5px solid;position:relative;overflow:hidden;
+        /* ── Nav ── */
+        .hc-nav{position:sticky;top:0;z-index:100;background:rgba(5,12,7,0.93);
+          backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.07);
+          padding:0 20px;display:flex;align-items:center;justify-content:space-between;
+          height:58px;gap:8px;}
+        .hc-nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;}
+        .hc-nav-logo span:last-child{font-family:'Playfair Display',serif;font-size:20px;color:#fdf3e3;font-weight:700;}
+        .hc-nav-logo em{color:#f4c25a;}
+        .hc-nav-btns{display:flex;gap:4px;}
+        .hc-nav-btn{border-radius:20px;padding:6px 14px;font-size:12px;
+          font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
+          transition:all 0.2s;white-space:nowrap;border:1px solid transparent;}
+        .hc-nav-btn.active{background:rgba(244,194,90,0.18);border-color:rgba(244,194,90,0.4);color:#f4c25a;}
+        .hc-nav-btn:not(.active){background:transparent;color:rgba(255,255,255,0.6);}
+
+        /* ── Cards ── */
+        .hc-card-inner{border-radius:24px;padding:22px;border:1.5px solid;position:relative;overflow:hidden;
           box-shadow:0 8px 32px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.1);}
         .hc-card-inner::before{content:'';position:absolute;top:-28px;right:-28px;width:110px;height:110px;
           border-radius:50%;background:var(--ac);opacity:0.1;pointer-events:none;}
-
         .hc-heart{position:absolute;top:12px;right:12px;border:none;border-radius:50%;
           width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;
           justify-content:center;transition:all 0.2s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
         .hc-heart:hover{transform:scale(1.18)}
-
-        .hc-emoji-box{border-radius:18px;background:rgba(255,255,255,0.92);display:flex;
+        .hc-emoji-box{border-radius:16px;background:rgba(255,255,255,0.92);display:flex;
           align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.3s;
           box-shadow:0 4px 16px var(--sh);}
         .hc-card-inner:hover .hc-emoji-box{transform:scale(1.1) rotate(6deg)}
-
-        .hc-ing{font-size:12px;font-weight:700;padding:4px 12px;border-radius:18px;
+        .hc-ing{font-size:11px;font-weight:700;padding:3px 10px;border-radius:16px;
           border:1.5px solid;display:inline-block;transition:transform 0.2s;}
         .hc-ing:hover{transform:scale(1.06)}
 
-        .hc-title{font-family:'Playfair Display',serif;font-size:clamp(44px,7vw,76px);
-          color:#fdf3e3;letter-spacing:-2px;line-height:1;
-          text-shadow:0 3px 0 rgba(80,30,5,0.5),0 6px 24px rgba(0,0,0,0.4);}
+        /* ── Search / Hero ── */
+        .hc-title{font-family:'Playfair Display',serif;color:#fdf3e3;letter-spacing:-2px;
+          line-height:1;text-shadow:0 3px 0 rgba(80,30,5,0.5),0 6px 24px rgba(0,0,0,0.4);}
         .hc-title em{color:#f4c25a;font-style:italic;}
-
-        .hc-tagline{color:#f0d9b5;font-size:13px;font-weight:700;letter-spacing:5px;
+        .hc-tagline{color:#f0d9b5;font-weight:700;letter-spacing:5px;
           text-transform:uppercase;margin-top:10px;text-shadow:0 1px 4px rgba(0,0,0,0.4);}
-
-        .hc-input{flex:1;min-width:240px;padding:16px 24px;font-size:15px;
-          font-family:'Nunito',sans-serif;font-weight:600;
-          border:2px solid rgba(255,235,180,0.35);border-radius:60px;
-          background:rgba(255,248,230,0.14);color:#fff8e7;
-          backdrop-filter:blur(14px);transition:all 0.3s;outline:none;}
+        .hc-search-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+        .hc-input{flex:1;padding:16px 24px;font-size:15px;font-family:'Nunito',sans-serif;
+          font-weight:600;border:2px solid rgba(255,235,180,0.35);border-radius:60px;
+          background:rgba(255,248,230,0.14);color:#fff8e7;backdrop-filter:blur(14px);
+          transition:all 0.3s;outline:none;}
         .hc-input::placeholder{color:rgba(255,235,180,0.5)}
         .hc-input:focus{border-color:rgba(244,194,90,0.8);background:rgba(255,248,230,0.22);
           box-shadow:0 0 0 4px rgba(244,194,90,0.18);}
-
-        .hc-btn{padding:16px 30px;background:linear-gradient(135deg,#e8a228,#d4721a);
-          color:#fff8e7;border:none;border-radius:60px;font-size:15px;font-weight:900;
+        .hc-btn{padding:16px 28px;background:linear-gradient(135deg,#e8a228,#d4721a);color:#fff8e7;
+          border:none;border-radius:60px;font-size:15px;font-weight:900;
           font-family:'Nunito',sans-serif;cursor:pointer;transition:all 0.25s;white-space:nowrap;
           animation:btnPulse 3s ease-in-out infinite;text-shadow:0 1px 3px rgba(0,0,0,0.3);}
-        .hc-btn:hover:not(:disabled){transform:scale(1.06) translateY(-2px);filter:brightness(1.1)}
+        .hc-btn:hover:not(:disabled){transform:scale(1.05) translateY(-2px);filter:brightness(1.1)}
         .hc-btn:active:not(:disabled){transform:scale(0.97)}
         .hc-btn:disabled{opacity:0.65;cursor:not-allowed;animation:none}
-
         .hc-qbtn{background:rgba(255,245,210,0.1);border:1.5px solid rgba(255,235,170,0.22);
-          border-radius:24px;padding:6px 15px;color:#f5dfa0;font-size:12px;
+          border-radius:24px;padding:6px 14px;color:#f5dfa0;font-size:12px;
           font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;}
         .hc-qbtn:hover{background:rgba(244,194,90,0.2);border-color:#f4c25a;color:#fff8e7}
 
+        /* ── Results / misc ── */
         .hc-loader-text{color:#f0d9b5;font-size:16px;font-weight:700;margin-top:16px;
           background:linear-gradient(90deg,#f0d9b5,#f4c25a,#e07830,#f0d9b5);
           background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
           animation:shimmer 2.2s linear infinite;}
-
-        .hc-results-title{font-family:'Playfair Display',serif;color:#fdf3e3;
-          font-size:clamp(19px,4vw,28px);text-align:center;margin-bottom:10px;
-          text-shadow:0 2px 12px rgba(0,0,0,0.4);}
-
+        .hc-results-title{font-family:'Playfair Display',serif;color:#fdf3e3;text-align:center;
+          margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,0.4);}
         .hc-disclaimer{display:inline-block;background:rgba(244,194,90,0.14);
           border:1px solid rgba(244,194,90,0.28);border-radius:30px;padding:6px 18px;
-          color:#f5dfa0;font-size:12px;font-weight:600;margin-bottom:22px;}
-
+          color:#f5dfa0;font-size:12px;font-weight:600;margin-bottom:20px;}
         .hc-back{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);
           border-radius:22px;padding:7px 16px;color:rgba(255,255,255,0.65);
           font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:12px;
-          margin-bottom:22px;transition:all 0.2s;}
+          margin-bottom:20px;transition:all 0.2s;}
         .hc-back:hover{background:rgba(255,255,255,0.14);color:rgba(255,255,255,0.9)}
-
-        .hc-nav{position:sticky;top:0;z-index:100;background:rgba(5,12,7,0.93);
-          backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.07);
-          padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;gap:8px;}
-
         .hc-error{max-width:480px;margin:16px auto;padding:16px 22px;
           background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);
           border-radius:18px;color:#ffcdd2;text-align:center;font-weight:600;}
-
         .hc-cat-card{border-radius:20px;padding:20px 16px;cursor:pointer;text-align:center;
           border:1px solid;transition:transform 0.2s,box-shadow 0.2s;}
         .hc-cat-card:hover{transform:translateY(-5px);}
 
+        /* ── Card grid ── */
+        .hc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;}
+        .hc-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+        .hc-feature-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
+        .hc-feature-card{background:rgba(255,245,210,0.09);border:1px solid rgba(255,235,170,0.15);
+          border-radius:18px;padding:22px 18px;width:148px;text-align:center;}
+
         button:focus{outline:none}
         input:focus{outline:none}
+
+        /* ════════════════════════════════════
+           MOBILE STYLES
+        ════════════════════════════════════ */
+        @media (max-width:640px){
+          /* Nav */
+          .hc-nav{height:auto;padding:10px 12px;flex-wrap:wrap;gap:6px;}
+          .hc-nav-logo span:last-child{font-size:17px;}
+          .hc-nav-btns{gap:3px;}
+          .hc-nav-btn{padding:5px 10px;font-size:11px;}
+
+          /* Hero */
+          .hc-title{font-size:42px !important;letter-spacing:-1px;}
+          .hc-tagline{font-size:10px;letter-spacing:3px;}
+
+          /* Search */
+          .hc-search-row{flex-direction:column;gap:8px;}
+          .hc-input{min-width:unset;width:100%;padding:14px 20px;font-size:14px;}
+          .hc-btn{width:100%;padding:14px 20px;font-size:14px;}
+          .hc-qbtn{font-size:11px;padding:5px 11px;}
+
+          /* Cards */
+          .hc-grid{grid-template-columns:1fr;}
+          .hc-card-inner{padding:16px;}
+          .hc-cat-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+          .hc-cat-card{padding:14px 10px;}
+          .hc-feature-grid{gap:10px;}
+          .hc-feature-card{width:130px;padding:16px 12px;}
+
+          /* Veggie - fewer/smaller on mobile */
+          .hc-veggie{opacity:0.15 !important;}
+
+          /* Results title */
+          .hc-results-title{font-size:20px !important;}
+
+          /* Category tabs - scrollable row */
+          .hc-cat-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;flex-wrap:nowrap !important;}
+          .hc-cat-tabs button{flex-shrink:0;}
+        }
+
+        @media (max-width:400px){
+          .hc-title{font-size:36px !important;}
+          .hc-nav-btn{padding:4px 8px;font-size:10px;}
+          .hc-cat-grid{grid-template-columns:1fr 1fr;}
+        }
       `}</style>
 
       <div className="hc-root">
 
-        {/* ── Veggie background (pointer-events:none so it never blocks clicks) ── */}
+        {/* Veggie background */}
         {BG_VEGGIES.map((v, i) => (
           <div key={i} className="hc-veggie"
-            style={{
-              left:`${v.x}%`, top:`${v.y}%`, fontSize:v.size, opacity:0.26,
-              animation:`vfloat${i % 4} ${v.dur}s ease-in-out infinite`,
+            style={{ left:`${v.x}%`, top:`${v.y}%`, fontSize:v.size, opacity:0.25,
+              animation:`vfloat${i%4} ${v.dur}s ease-in-out infinite`,
               animationDelay:`${v.delay}s`,
-              transform:`translate(${(mouse.x-0.5)*v.speed*-120}px,${(mouse.y-0.5)*v.speed*-120}px)`,
-            }}>
+              transform:`translate(${(mouse.x-0.5)*v.speed*-120}px,${(mouse.y-0.5)*v.speed*-120}px)` }}>
             {v.emoji}
           </div>
         ))}
 
-        {/* ── Nav ─────────────────────────────────────────────────────── */}
+        {/* ── Nav ─────────────────────────────────────────────── */}
         <nav className="hc-nav">
-          <div onClick={() => setView("home")}
-            style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer", flexShrink:0 }}>
-            <span style={{ fontSize:24 }}>🌿</span>
-            <span style={{ fontFamily:"'Playfair Display',serif", fontSize:20, color:"#fdf3e3", fontWeight:700 }}>
-              Home <em style={{ color:"#f4c25a" }}>Cure</em>
-            </span>
+          <div className="hc-nav-logo" onClick={() => setView("home")}>
+            <span style={{ fontSize:22 }}>🌿</span>
+            <span>Home <em>Cure</em></span>
           </div>
-          <div style={{ display:"flex", gap:4 }}>
+          <div className="hc-nav-btns">
             {[
               { label:"🏠 Home",       v:"home" },
               { label:"📂 Categories", v:"categories" },
-              { label:`❤️ Favorites${favCount > 0 ? ` (${favCount})` : ""}`, v:"favorites" },
+              { label:`❤️ ${favCount > 0 ? `(${favCount})` : "Favorites"}`, v:"favorites" },
             ].map(nav => {
-              const active = view === nav.v || (view === "cat-detail" && nav.v === "categories");
+              const active = view===nav.v || (view==="cat-detail" && nav.v==="categories");
               return (
-                <button key={nav.v} onClick={() => setView(nav.v)}
-                  style={{ background: active ? "rgba(244,194,90,0.18)" : "transparent",
-                    border: active ? "1px solid rgba(244,194,90,0.4)" : "1px solid transparent",
-                    borderRadius:20, padding:"6px 14px",
-                    color: active ? "#f4c25a" : "rgba(255,255,255,0.6)",
-                    fontSize:12, fontFamily:"'Nunito',sans-serif", fontWeight:700,
-                    cursor:"pointer", transition:"all 0.2s", whiteSpace:"nowrap" }}>
+                <button key={nav.v} className={`hc-nav-btn${active?" active":""}`} onClick={() => setView(nav.v)}>
                   {nav.label}
                 </button>
               );
@@ -368,30 +418,32 @@ export default function HomeCureApp() {
           </div>
         </nav>
 
-        {/* ════════════════════════════════════════════════════════════
+        {/* ════════════════════════════════════
             HOME VIEW
-        ════════════════════════════════════════════════════════════ */}
+        ════════════════════════════════════ */}
         {view === "home" && (
           <div>
-            {/* Hero */}
-            <div style={{ textAlign:"center", padding:"52px 20px 30px" }}>
+            <div style={{ textAlign:"center", padding:"44px 20px 28px" }}>
               <div className="hc-hero">
-                <div style={{ fontSize:56, marginBottom:6, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.4))" }}>🌿</div>
-                <h1 className="hc-title">Home <em>Cure</em></h1>
-                <p className="hc-tagline">Kitchen Remedies · Nature's Wisdom</p>
-                <div style={{ maxWidth:600, margin:"28px auto 0", display:"flex", gap:10, flexWrap:"wrap", justifyContent:"center" }}>
-                  <input className="hc-input" value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && fetchRemedies()}
-                    placeholder="What ails you? headache, cold, sore throat…"/>
-                  <button className="hc-btn" onClick={() => fetchRemedies()} disabled={loading}>
-                    {loading ? "✨ Searching…" : "🔍 Find Remedies"}
-                  </button>
+                <div style={{ fontSize:52, marginBottom:6, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.4))" }}>🌿</div>
+                <h1 className="hc-title" style={{ fontSize:"clamp(40px,7vw,74px)" }}>Home <em>Cure</em></h1>
+                <p className="hc-tagline" style={{ fontSize:12 }}>Kitchen Remedies · Nature's Wisdom</p>
+
+                <div style={{ maxWidth:600, margin:"26px auto 0" }}>
+                  <div className="hc-search-row">
+                    <input className="hc-input" value={query}
+                      onChange={e => setQuery(e.target.value)}
+                      onKeyDown={e => e.key==="Enter" && fetchRemedies()}
+                      placeholder="What ails you? headache, cold, acne…"/>
+                    <button className="hc-btn" onClick={() => fetchRemedies()} disabled={loading}>
+                      {loading ? "✨ Searching…" : "🔍 Find Remedies"}
+                    </button>
+                  </div>
                 </div>
-                <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginTop:13 }}>
+
+                <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginTop:13, padding:"0 10px" }}>
                   {QUICK_PICKS.map(p => (
-                    <button key={p.q} className="hc-qbtn"
-                      onClick={() => { setQuery(p.q); fetchRemedies(p.q); }}>
+                    <button key={p.q} className="hc-qbtn" onClick={() => { setQuery(p.q); fetchRemedies(p.q); }}>
                       {p.label}
                     </button>
                   ))}
@@ -399,111 +451,105 @@ export default function HomeCureApp() {
               </div>
             </div>
 
-            {/* Loading */}
             {loading && (
-              <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                <div style={{ fontSize:54, display:"inline-block", animation:"leafSpin 1.8s linear infinite", filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.3))" }}>🌿</div>
-                <p className="hc-loader-text">Searching nature's pantry for you…</p>
+              <div style={{ textAlign:"center", padding:"56px 20px" }}>
+                <div style={{ fontSize:52, display:"inline-block", animation:"leafSpin 1.8s linear infinite" }}>🌿</div>
+                <p className="hc-loader-text">Searching nature's pantry…</p>
               </div>
             )}
 
-            {/* Error */}
             {srchError && <div className="hc-error">🌿 {srchError}</div>}
 
-            {/* Results */}
             {remedies && !loading && (
-              <div style={{ maxWidth:940, margin:"0 auto", padding:"0 20px 40px" }}>
-                <div style={{ textAlign:"center", marginBottom:24 }}>
-                  <h2 className="hc-results-title">
+              <div style={{ maxWidth:940, margin:"0 auto", padding:"0 16px 40px" }}>
+                <div style={{ textAlign:"center", marginBottom:22 }}>
+                  <h2 className="hc-results-title" style={{ fontSize:"clamp(18px,4vw,26px)" }}>
                     Remedies for <em style={{ color:"#f4c25a", fontStyle:"italic" }}>{remedies.condition}</em>
                   </h2>
                   {remedies.disclaimer && <p className="hc-disclaimer">⚕️ {remedies.disclaimer}</p>}
                 </div>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(380px,1fr))", gap:18 }}>
-                  {(remedies.remedies || []).map((r, i) => (
+                <div className="hc-grid">
+                  {(remedies.remedies||[]).map((r,i) => (
                     <RemedyCard key={r.id} remedy={r} themeIdx={i} isFav={isFav} onToggleFav={toggleFav}/>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Landing feature cards */}
             {!loading && !remedies && !srchError && (
-              <div style={{ textAlign:"center", padding:"10px 20px 50px" }}>
-                <p style={{ color:"rgba(255,240,200,0.45)", fontSize:14, fontWeight:600, marginBottom:28 }}>
+              <div style={{ textAlign:"center", padding:"8px 20px 50px" }}>
+                <p style={{ color:"rgba(255,240,200,0.42)", fontSize:14, fontWeight:600, marginBottom:26 }}>
                   Type your ailment or pick one above to get started
                 </p>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:16, justifyContent:"center" }}>
+                <div className="hc-feature-grid">
                   {[
                     { icon:"🌿", text:"Natural kitchen ingredients" },
                     { icon:"⚡", text:"Fast AI-powered lookup" },
                     { icon:"📖", text:"Step-by-step instructions" },
                     { icon:"❤️", text:"Time-tested wisdom" },
-                  ].map((f, i) => (
-                    <div key={i} style={{ background:"rgba(255,245,210,0.09)", border:"1px solid rgba(255,235,170,0.15)", borderRadius:18, padding:"22px 18px", width:155, textAlign:"center" }}>
-                      <div style={{ fontSize:34, marginBottom:10 }}>{f.icon}</div>
+                  ].map((f,i) => (
+                    <div key={i} className="hc-feature-card">
+                      <div style={{ fontSize:32, marginBottom:9 }}>{f.icon}</div>
                       <div style={{ color:"rgba(255,240,200,0.7)", fontSize:12, fontWeight:600, lineHeight:1.4 }}>{f.text}</div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            <p style={{ textAlign:"center", color:"rgba(255,240,200,0.28)", fontSize:12, paddingBottom:30 }}>
+
+            <p style={{ textAlign:"center", color:"rgba(255,240,200,0.25)", fontSize:11, paddingBottom:28 }}>
               🌿 Always consult a healthcare professional for serious conditions
             </p>
           </div>
         )}
 
-        {/* ════════════════════════════════════════════════════════════
+        {/* ════════════════════════════════════
             CATEGORIES VIEW
-        ════════════════════════════════════════════════════════════ */}
+        ════════════════════════════════════ */}
         {view === "categories" && (
-          <div style={{ maxWidth:940, margin:"0 auto", padding:"34px 20px 60px" }}>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:28, marginBottom:4 }}>📂 Browse by Category</h2>
-            <p style={{ color:"rgba(255,240,200,0.4)", fontWeight:600, marginBottom:26, fontSize:13 }}>
+          <div style={{ maxWidth:940, margin:"0 auto", padding:"30px 16px 60px" }}>
+            <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:"clamp(22px,5vw,28px)", marginBottom:4 }}>📂 Browse by Category</h2>
+            <p style={{ color:"rgba(255,240,200,0.4)", fontWeight:600, marginBottom:24, fontSize:13 }}>
               Pick a health focus to get AI-powered natural remedies
             </p>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:14 }}>
+            <div className="hc-cat-grid">
               {CATEGORIES.map(cat => (
                 <div key={cat.id} className="hc-cat-card"
                   style={{ background:`linear-gradient(140deg,${cat.grad[0]},${cat.grad[1]})`, borderColor:`${cat.accent}22` }}
                   onClick={() => fetchCategoryRemedies(cat)}>
-                  <div style={{ fontSize:36, marginBottom:10 }}>{cat.emoji}</div>
-                  <div style={{ fontFamily:"'Playfair Display',serif", color:cat.text, fontSize:15, fontWeight:700, marginBottom:4 }}>{cat.label}</div>
-                  <div style={{ color:cat.accent, fontSize:11, fontWeight:600, lineHeight:1.4 }}>{cat.desc}</div>
+                  <div style={{ fontSize:32, marginBottom:8 }}>{cat.emoji}</div>
+                  <div style={{ fontFamily:"'Playfair Display',serif", color:cat.text, fontSize:14, fontWeight:700, marginBottom:3 }}>{cat.label}</div>
+                  <div style={{ color:cat.accent, fontSize:10, fontWeight:600, lineHeight:1.4 }}>{cat.desc}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ════════════════════════════════════════════════════════════
+        {/* ════════════════════════════════════
             CATEGORY DETAIL VIEW
-        ════════════════════════════════════════════════════════════ */}
+        ════════════════════════════════════ */}
         {view === "cat-detail" && (
-          <div style={{ maxWidth:940, margin:"0 auto", padding:"28px 20px 60px" }}>
+          <div style={{ maxWidth:940, margin:"0 auto", padding:"26px 16px 60px" }}>
             <button className="hc-back" onClick={() => setView("categories")}>← All Categories</button>
 
             {selectedCat && (
-              <div style={{ marginBottom:22 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:16 }}>
-                  <span style={{ fontSize:42 }}>{selectedCat.emoji}</span>
+              <div style={{ marginBottom:20 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                  <span style={{ fontSize:38 }}>{selectedCat.emoji}</span>
                   <div>
-                    <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:26, marginBottom:2 }}>{selectedCat.label}</h2>
-                    <p style={{ color:"rgba(255,240,200,0.4)", fontSize:13, fontWeight:600 }}>{selectedCat.desc}</p>
+                    <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:"clamp(20px,5vw,26px)", marginBottom:2 }}>{selectedCat.label}</h2>
+                    <p style={{ color:"rgba(255,240,200,0.4)", fontSize:12, fontWeight:600 }}>{selectedCat.desc}</p>
                   </div>
                 </div>
-                {/* Category switcher tabs */}
-                <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                <div className="hc-cat-tabs" style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
                   {CATEGORIES.map(cat => (
                     <button key={cat.id} onClick={() => fetchCategoryRemedies(cat)}
                       style={{ background: selectedCat.id===cat.id ? "#f4c25a" : "rgba(255,255,255,0.07)",
-                        border:"1.5px solid",
-                        borderColor: selectedCat.id===cat.id ? "#f4c25a" : "rgba(255,255,255,0.12)",
-                        borderRadius:22, padding:"5px 13px",
+                        border:"1.5px solid", borderColor: selectedCat.id===cat.id ? "#f4c25a" : "rgba(255,255,255,0.12)",
+                        borderRadius:22, padding:"5px 12px",
                         color: selectedCat.id===cat.id ? "#2a1500" : "#d4f0da",
-                        fontSize:11, fontFamily:"'Nunito',sans-serif", fontWeight:700,
-                        cursor:"pointer", transition:"all 0.2s" }}>
+                        fontSize:11, fontFamily:"'Nunito',sans-serif", fontWeight:700, cursor:"pointer", transition:"all 0.2s" }}>
                       {cat.emoji} {cat.label}
                     </button>
                   ))}
@@ -512,21 +558,15 @@ export default function HomeCureApp() {
             )}
 
             {catLoading && (
-              <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                <div style={{ fontSize:54, display:"inline-block", animation:"leafSpin 1.8s linear infinite", filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.3))" }}>🌿</div>
+              <div style={{ textAlign:"center", padding:"56px 20px" }}>
+                <div style={{ fontSize:52, display:"inline-block", animation:"leafSpin 1.8s linear infinite" }}>🌿</div>
                 <p className="hc-loader-text">Loading {selectedCat?.label} remedies…</p>
               </div>
             )}
-
-            {catError && (
-              <p style={{ textAlign:"center", color:"#ef9a9a", fontWeight:700, padding:"30px 0" }}>
-                Something went wrong. Please try again.
-              </p>
-            )}
-
+            {catError && <p style={{ textAlign:"center", color:"#ef9a9a", fontWeight:700, padding:"30px 0" }}>Something went wrong. Please try again.</p>}
             {catRemedies && !catLoading && (
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(380px,1fr))", gap:18 }}>
-                {catRemedies.map((r, i) => (
+              <div className="hc-grid">
+                {catRemedies.map((r,i) => (
                   <RemedyCard key={r.id} remedy={r} themeIdx={i} isFav={isFav} onToggleFav={toggleFav}/>
                 ))}
               </div>
@@ -534,21 +574,21 @@ export default function HomeCureApp() {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════════════════════
+        {/* ════════════════════════════════════
             FAVORITES VIEW
-        ════════════════════════════════════════════════════════════ */}
+        ════════════════════════════════════ */}
         {view === "favorites" && (
-          <div style={{ maxWidth:940, margin:"0 auto", padding:"34px 20px 60px" }}>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:28, marginBottom:4 }}>❤️ My Favorites</h2>
-            <p style={{ color:"rgba(255,240,200,0.4)", fontWeight:600, marginBottom:26, fontSize:13 }}>
-              {favCount > 0 ? `${favCount} saved ${favCount === 1 ? "remedy" : "remedies"}` : "Your saved remedies appear here"}
+          <div style={{ maxWidth:940, margin:"0 auto", padding:"30px 16px 60px" }}>
+            <h2 style={{ fontFamily:"'Playfair Display',serif", color:"#fdf3e3", fontSize:"clamp(22px,5vw,28px)", marginBottom:4 }}>❤️ My Favorites</h2>
+            <p style={{ color:"rgba(255,240,200,0.4)", fontWeight:600, marginBottom:24, fontSize:13 }}>
+              {favCount > 0 ? `${favCount} saved ${favCount===1?"remedy":"remedies"}` : "Your saved remedies appear here"}
             </p>
 
             {favCount === 0 ? (
-              <div style={{ textAlign:"center", padding:"60px 20px" }}>
-                <div style={{ fontSize:64, marginBottom:14 }}>🤍</div>
+              <div style={{ textAlign:"center", padding:"56px 20px" }}>
+                <div style={{ fontSize:60, marginBottom:12 }}>🤍</div>
                 <p style={{ color:"rgba(255,240,200,0.45)", fontSize:16, fontWeight:700, marginBottom:8 }}>No favorites saved yet!</p>
-                <p style={{ color:"rgba(255,240,200,0.28)", fontSize:13, marginBottom:24 }}>Tap the ❤️ heart on any remedy card to save it here.</p>
+                <p style={{ color:"rgba(255,240,200,0.28)", fontSize:13, marginBottom:22 }}>Tap ❤️ on any remedy card to save it here.</p>
                 <button onClick={() => setView("categories")}
                   style={{ background:"#f4c25a", color:"#2a1500", border:"none", borderRadius:30, padding:"11px 24px", fontFamily:"'Nunito',sans-serif", fontWeight:800, fontSize:13, cursor:"pointer" }}>
                   📂 Browse Categories
@@ -556,14 +596,13 @@ export default function HomeCureApp() {
               </div>
             ) : (
               <>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(380px,1fr))", gap:18 }}>
-                  {favorites.map((r, i) => (
+                <div className="hc-grid">
+                  {favorites.map((r,i) => (
                     <RemedyCard key={r.id} remedy={r} themeIdx={i} isFav={isFav} onToggleFav={toggleFav}/>
                   ))}
                 </div>
-                <div style={{ textAlign:"center", marginTop:30 }}>
-                  <button
-                    onClick={() => { if (window.confirm("Clear all favorites?")) setFavorites([]); }}
+                <div style={{ textAlign:"center", marginTop:28 }}>
+                  <button onClick={() => { if(window.confirm("Clear all favorites?")) setFavorites([]); }}
                     style={{ background:"rgba(255,80,80,0.15)", border:"1px solid rgba(255,80,80,0.3)", borderRadius:24, padding:"8px 20px", color:"#ffcdd2", fontFamily:"'Nunito',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer" }}>
                     🗑 Clear All Favorites
                   </button>
